@@ -6,7 +6,18 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
-import { Zap, CogIcon as Coil, Magnet, Thermometer, Wrench, TrendingDown, Lightbulb, Package, Download, Send } from 'lucide-react'
+import {
+  Zap,
+  CogIcon as Coil,
+  Magnet,
+  Thermometer,
+  Wrench,
+  TrendingDown,
+  Lightbulb,
+  Package,
+  Download,
+  Send,
+} from "lucide-react"
 import type { TransformerResults, TransformerInputs, BOMItem } from "@/lib/types"
 
 interface ResultsDisplayProps {
@@ -46,6 +57,37 @@ export function ResultsDisplay({ results, userInputs }: ResultsDisplayProps) {
       }
     } catch (error) {
       console.error("API Error:", error)
+    }
+  }
+
+  const handlePDFDownload = async () => {
+    try {
+      const response = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData: userInputs,
+          results: results,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF")
+      }
+
+      // Download the filled PDF
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `Transformateur_${userInputs.client_name || "Client"}_${userInputs.project_name || "Projet"}_${new Date().toISOString().split("T")[0]}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error("PDF Generation Error:", error)
+      alert("Erreur lors de la génération du PDF")
     }
   }
 
@@ -392,9 +434,9 @@ export function ResultsDisplay({ results, userInputs }: ResultsDisplayProps) {
             <Send className="h-4 w-4" />
             Send to API
           </Button>
-          <Button variant="outline" className="flex items-center gap-2 bg-transparent">
+          <Button variant="outline" onClick={handlePDFDownload} className="flex items-center gap-2 bg-transparent">
             <Download className="h-4 w-4" />
-            Download PDF Report
+            Download PDF 
           </Button>
         </div>
       </CardContent>
