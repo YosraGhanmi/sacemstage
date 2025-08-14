@@ -1,42 +1,37 @@
 import type { TransformerInputs, TransformerResults } from "./types"
 
 export class PDFFieldMapper {
-  // Complete field mapping between your UI and PDF form
   private readonly FIELD_MAP = {
-    // Header fields
-    client_name: "client",
-    project_name: "reference",
-    transformer_type: "type",
-    installation_type: "installation",
+    // Champs d'en-tête
+    nom_client: "client",
+    nom_projet: "reference",
+    type_installation: "installation",
     Date: "Date",
     reference: "reference",
     revision: "revision",
+    // Caractéristiques électriques - FIXED: Added proper mapping for primary/secondary voltages
+    puissance_kva: "kVA",
+    frequence_hz: "frequence",
+    tension_primaire: "U1n",
+    tension_secondaire: "U20",
+    elevation_temperature_max: "echauffement2",
+    //couplage_primaire: "Couplage",
 
-    // Electrical characteristics
-    power_kva: "kVA",
-    frequency_hz: "frequence",
-    primary_voltage: "U1n(V)",
-    secondary_voltage: "U20 (V)",
-    max_temperature_rise: "Variation",
-    primary_coupling: "Couplage",
-
-    // Technical parameters
-    core_material: "ClU(KV)",
-    current_density: "Densite",
+    // Paramètres techniques
+    materiau_noyau: "ClU",
+    densite_courant: "Densite",
     b_max: "Induction",
-    sheet_type: "ToleMagnetique",
-    winding_material: "NatureBob",
-    cooling_type: "DureeCC",
+    type_tole: "ToleMagnetique",
+    materiau_enroulement: "NatureBob",
 
-    // Losses and performance
-    core_losses: "PerteVide",
-    no_load_current: "I0Vide",
-    copper_losses: "Pcc",
-    short_circuit_voltage: "Ucc",
-    total_losses: "PertesTot",
-    temperature_rise: "echauffement",
+    // Pertes et performances
+    pertes_fer: "PerteVide",
+    courant_vide: "I0Vide",
+    pertes_cuivre: "Pcc",
+    tension_court_circuit: "Ucc",
+    pertes_totales: "PertesTot",
+    Echauffement: "echauffement1",
 
-    // Calculated electrical values
     tensionLignePrim: "tensionLignePrim",
     tensionLigneSec: "tensionLigneSec",
     tensionPhasePrim: "tensionPhasePrim",
@@ -49,7 +44,7 @@ export class PDFFieldMapper {
     ClasseTensionSec: "ClasseTensionSec",
     ClasseTensionlast: "ClasseTensionlast",
 
-    // Winding calculations
+    // Calculs de bobinage
     largeurA: "largeurA",
     largeurB: "largeurB",
     largeurC: "largeurC",
@@ -74,7 +69,7 @@ export class PDFFieldMapper {
     gradinJ: "gradinJ",
     gradinK: "gradinK",
 
-    // Core geometry
+    // Géométrie du noyau
     ColonnesSnette: "ColonnesSnette",
     ColonnesBT: "ColonnesBT",
     ColonnesMasse: "ColonnesMasse",
@@ -87,7 +82,7 @@ export class PDFFieldMapper {
     MasseCulplusCol: "MasseCulplusCol",
     MasseTotale: "MasseTotale",
 
-    // Winding parameters
+    // Paramètres de bobinage
     BobSectionduConducteurprim1: "BobSectionduConducteurprim1",
     BobSectionduConducteurSec: "BobSectionduConducteurSec",
     DensiteCourantPrim: "DensiteCourantPrim",
@@ -97,7 +92,7 @@ export class PDFFieldMapper {
     SpiresCouchePrim: "SpiresCouchePrim",
     SpiresCoucheSec: "SpiresCoucheSec",
 
-    // Short circuit parameters
+    // Paramètres de court-circuit
     PCC75: "PCC75",
     addi: "addi",
     Ucca: "Ucca",
@@ -106,86 +101,126 @@ export class PDFFieldMapper {
     UccCorrigee: "UccCorrigee",
     ResistanceBT75: "ResistanceBT75",
     ResistanceMT75: "ResistanceMT75",
+
+    "Vsp(V)": "spiresVsp",
+    N1: "spiresN1",
+    N2: "spiresN2",
   }
 
-  mapToPDFFields(inputs: TransformerInputs, results: TransformerResults): Record<string, any> {
-    const pdfData: Record<string, any> = {}
+  mapperVersChampsPDF(entrees: TransformerInputs, resultats: TransformerResults): Record<string, any> {
+    const donneesPDF: Record<string, any> = {}
 
-    // Map input values
-    Object.entries(inputs).forEach(([key, value]) => {
-      const pdfField = this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]
-      if (pdfField) {
-        pdfData[pdfField] = this.formatValue(value)
+    donneesPDF["type"] = this.composerChampInstallation(entrees)
+    donneesPDF["Couplage"] = this.composercouplage(entrees)
+    donneesPDF["ToleMagn"] = this.composerToleMagn(entrees)
+    // Mapper les valeurs d'entrée
+    Object.entries(entrees).forEach(([cle, valeur]) => {
+      const champPDF = this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]
+      if (champPDF) {
+        donneesPDF[champPDF] = this.formaterValeur(valeur)
       }
     })
 
-    // Map calculated results
-    this.mapCalculatedResults(results, pdfData)
+    // Mapper les résultats calculés
+    this.mapperResultatsCalcules(resultats, donneesPDF)
 
-    // Add current date
-    pdfData["Date"] = new Date().toLocaleDateString("fr-FR")
+    // Ajouter la date actuelle
+    donneesPDF["Date"] = new Date().toLocaleDateString("fr-FR")
 
-    return pdfData
+    return donneesPDF
+  }
+  composerToleMagn(entrees: TransformerInputs): string {
+    const{type_tole,
+    }= entrees
+    return `${type_tole}`
+  }
+  composercouplage(entrees: TransformerInputs): string {
+    const {
+      couplage_primaire,
+      couplage_secondaire
+    } = entrees
+
+    return `${couplage_primaire} ${couplage_secondaire} `
   }
 
-  private mapCalculatedResults(results: TransformerResults, pdfData: Record<string, any>) {
-    // Map electrical results
-    Object.entries(results.electrical).forEach(([key, value]) => {
-      const pdfField = this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]
-      if (pdfField) {
-        pdfData[pdfField] = this.formatValue(value)
+  private composerChampInstallation(entrees: TransformerInputs): string {
+    const {
+      puissance_kva,
+      type_transformateur,
+      configuration,
+      type_circuit_magnetique,
+    } = entrees
+
+    return `Transformateur ${configuration || "Triphasé"} ${puissance_kva} kVA à ${type_circuit_magnetique || "3 colonnes"} ${type_transformateur || "Hermétique"}`
+  }
+
+  private mapperResultatsCalcules(resultats: TransformerResults, donneesPDF: Record<string, any>) {
+    // Mapper les résultats électriques
+    Object.entries(resultats.electrique).forEach(([cle, valeur]) => {
+      const champPDF = this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]
+      if (champPDF) {
+        donneesPDF[champPDF] = this.formaterValeur(valeur)
+      } else {
+        // Direct mapping for fields that match exactly
+        donneesPDF[cle] = this.formaterValeur(valeur)
       }
     })
 
-    // Map winding results
-    Object.entries(results.winding).forEach(([key, value]) => {
-      const pdfField = this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]
-      if (pdfField) {
-        pdfData[pdfField] = this.formatValue(value)
+    // Mapper les résultats de bobinage
+    Object.entries(resultats.bobinage).forEach(([cle, valeur]) => {
+      const champPDF = this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]
+      if (champPDF) {
+        donneesPDF[champPDF] = this.formaterValeur(valeur)
+      } else {
+        donneesPDF[cle] = this.formaterValeur(valeur)
       }
     })
 
-    // Map geometry results
-    Object.entries(results.geometry).forEach(([key, value]) => {
-      const pdfField = this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]
-      if (pdfField) {
-        pdfData[pdfField] = this.formatValue(value)
+    // Mapper les résultats de géométrie
+    Object.entries(resultats.geometrie).forEach(([cle, valeur]) => {
+      const champPDF = this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]
+      if (champPDF) {
+        donneesPDF[champPDF] = this.formaterValeur(valeur)
+      } else {
+        donneesPDF[cle] = this.formaterValeur(valeur)
       }
     })
 
-    // Map thermal results
-    Object.entries(results.thermal).forEach(([key, value]) => {
-      const pdfField = this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]
-      if (pdfField) {
-        pdfData[pdfField] = this.formatValue(value)
+    // Mapper les résultats thermiques
+    Object.entries(resultats.thermique).forEach(([cle, valeur]) => {
+      const champPDF = this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]
+      if (champPDF) {
+        donneesPDF[champPDF] = this.formaterValeur(valeur)
+      } else {
+        donneesPDF[cle] = this.formaterValeur(valeur)
       }
     })
   }
 
-  private formatValue(value: any): string {
-    if (typeof value === "number") {
-      return Number.isInteger(value) ? value.toString() : value.toFixed(2)
+  private formaterValeur(valeur: any): string {
+    if (typeof valeur === "number") {
+      return Number.isInteger(valeur) ? valeur.toString() : valeur.toFixed(2)
     }
-    return String(value)
+    return String(valeur)
   }
 
-  // Generate field mapping for debugging
-  generateFieldMappingReport(inputs: TransformerInputs, results: TransformerResults): string {
-    const pdfData = this.mapToPDFFields(inputs, results)
+  // Générer un rapport de mappage des champs pour le débogage
+  genererRapportMappageChamps(entrees: TransformerInputs, resultats: TransformerResults): string {
+    const donneesPDF = this.mapperVersChampsPDF(entrees, resultats)
 
-    let report = "=== PDF FIELD MAPPING REPORT ===\n\n"
+    let rapport = "=== RAPPORT DE MAPPAGE DES CHAMPS PDF ===\n\n"
 
-    Object.entries(pdfData).forEach(([pdfField, value]) => {
-      report += `PDF Field: "${pdfField}" = "${value}"\n`
+    Object.entries(donneesPDF).forEach(([champPDF, valeur]) => {
+      rapport += `Champ PDF: "${champPDF}" = "${valeur}"\n`
     })
 
-    report += "\n=== UNMAPPED INPUT FIELDS ===\n"
-    Object.keys(inputs).forEach((key) => {
-      if (!this.FIELD_MAP[key as keyof typeof this.FIELD_MAP]) {
-        report += `Input field "${key}" has no PDF mapping\n`
+    rapport += "\n=== CHAMPS D'ENTRÉE NON MAPPÉS ===\n"
+    Object.keys(entrees).forEach((cle) => {
+      if (!this.FIELD_MAP[cle as keyof typeof this.FIELD_MAP]) {
+        rapport += `Champ d'entrée "${cle}" n'a pas de mappage PDF\n`
       }
     })
 
-    return report
+    return rapport
   }
 }

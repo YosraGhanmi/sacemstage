@@ -10,114 +10,114 @@ const execAsync = promisify(exec)
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting PDF generation process...")
+    console.log("Démarrage du processus de génération PDF...")
 
     const { inputs, results }: { inputs: TransformerInputs; results: TransformerResults } = await request.json()
 
-    console.log("Received inputs:", JSON.stringify(inputs, null, 2))
-    console.log("Received results:", JSON.stringify(results, null, 2))
+    console.log("Entrées reçues:", JSON.stringify(inputs, null, 2))
+    console.log("Résultats reçus:", JSON.stringify(results, null, 2))
 
     const scriptPath = path.join(process.cwd(), "scripts", "enhanced_pdf_filler.py")
     const inputPdfPath = path.join(process.cwd(), "public", "pdfvide.pdf")
 
-    console.log("🔍 Checking file paths...")
-    console.log("Script path:", scriptPath)
-    console.log("Input PDF path:", inputPdfPath)
+    console.log("🔍 Vérification des chemins de fichiers...")
+    console.log("Chemin du script:", scriptPath)
+    console.log("Chemin du PDF d'entrée:", inputPdfPath)
 
     if (!fs.existsSync(scriptPath)) {
-      console.error("Python script not found:", scriptPath)
-      throw new Error(`Python script not found: ${scriptPath}`)
+      console.error("Script Python non trouvé:", scriptPath)
+      throw new Error(`Script Python non trouvé: ${scriptPath}`)
     }
     if (!fs.existsSync(inputPdfPath)) {
-      console.error("Input PDF not found:", inputPdfPath)
-      throw new Error(`Input PDF not found: ${inputPdfPath}`)
+      console.error("PDF d'entrée non trouvé:", inputPdfPath)
+      throw new Error(`PDF d'entrée non trouvé: ${inputPdfPath}`)
     }
 
-    console.log("All required files found")
+    console.log("Tous les fichiers requis trouvés")
 
-    console.log("Generating PDF field mapping...")
-    const mapper = new PDFFieldMapper()
-    const pdfData = mapper.mapToPDFFields(inputs, results)
+    console.log("Génération du mappage des champs PDF...")
+    const mappeur = new PDFFieldMapper()
+    const donneesPDF = mappeur.mapperVersChampsPDF(inputs, results)
 
-    console.log("Generated PDF field data:", JSON.stringify(pdfData, null, 2))
+    console.log("Données de champs PDF générées:", JSON.stringify(donneesPDF, null, 2))
 
-    const tempDataFile = path.join(process.cwd(), "temp_form_data.json")
-    fs.writeFileSync(tempDataFile, JSON.stringify(pdfData, null, 2))
+    const fichierDonneesTemp = path.join(process.cwd(), "temp_form_data.json")
+    fs.writeFileSync(fichierDonneesTemp, JSON.stringify(donneesPDF, null, 2))
 
-    console.log("Written temp data file:", tempDataFile)
+    console.log("Fichier de données temporaire écrit:", fichierDonneesTemp)
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-    const outputFilename = `transformer_project_${timestamp}.pdf`
-    const outputPath = path.join(process.cwd(), outputFilename)
+    const horodatage = new Date().toISOString().replace(/[:.]/g, "-")
+    const nomFichierSortie = `transformateur_projet_${horodatage}.pdf`
+    const cheminSortie = path.join(process.cwd(), nomFichierSortie)
 
-    console.log("Target output file:", outputPath)
+    console.log("Fichier de sortie cible:", cheminSortie)
 
-    console.log("Executing Python script...")
-    let command = `python3 "${scriptPath}" fill "${inputPdfPath}" "${tempDataFile}" "${outputPath}"`
-    let result
+    console.log("Exécution du script Python...")
+    let commande = `python3 "${scriptPath}" fill "${inputPdfPath}" "${fichierDonneesTemp}" "${cheminSortie}"`
+    let resultat
 
     try {
-      console.log("Running command:", command)
-      result = await execAsync(command, { timeout: 30000 }) // 30 second timeout
+      console.log("Exécution de la commande:", commande)
+      resultat = await execAsync(commande, { timeout: 30000 }) // Timeout de 30 secondes
     } catch (error) {
-      console.log("python3 failed, trying python...")
-      command = `python "${scriptPath}" fill "${inputPdfPath}" "${tempDataFile}" "${outputPath}"`
-      console.log("Running command:", command)
-      result = await execAsync(command, { timeout: 30000 })
+      console.log("python3 a échoué, essai avec python...")
+      commande = `python "${scriptPath}" fill "${inputPdfPath}" "${fichierDonneesTemp}" "${cheminSortie}"`
+      console.log("Exécution de la commande:", commande)
+      resultat = await execAsync(commande, { timeout: 30000 })
     }
 
-    const { stdout, stderr } = result
+    const { stdout, stderr } = resultat
 
-    console.log("Python stdout:", stdout)
+    console.log("Sortie Python stdout:", stdout)
     if (stderr) {
-      console.error("Python stderr:", stderr)
+      console.error("Sortie Python stderr:", stderr)
     }
 
-    // Clean up temp file
-    console.log("Cleaning up temp data file...")
-    if (fs.existsSync(tempDataFile)) {
-      fs.unlinkSync(tempDataFile)
+    // Nettoyer le fichier temporaire
+    console.log("Nettoyage du fichier de données temporaire...")
+    if (fs.existsSync(fichierDonneesTemp)) {
+      fs.unlinkSync(fichierDonneesTemp)
     }
 
-    // Check if output file was created
-    console.log("Checking if PDF was generated...")
-    if (!fs.existsSync(outputPath)) {
-      console.error("Generated PDF file not found:", outputPath)
-      throw new Error(`Generated PDF file not found: ${outputPath}`)
+    // Vérifier si le fichier de sortie a été créé
+    console.log("Vérification si le PDF a été généré...")
+    if (!fs.existsSync(cheminSortie)) {
+      console.error("Fichier PDF généré non trouvé:", cheminSortie)
+      throw new Error(`Fichier PDF généré non trouvé: ${cheminSortie}`)
     }
 
-    console.log("PDF file generated successfully!")
+    console.log("Fichier PDF généré avec succès!")
 
-    // Read the generated PDF file
-    console.log("Reading generated PDF...")
-    const pdfBuffer = fs.readFileSync(outputPath)
-    console.log("PDF size:", pdfBuffer.length, "bytes")
+    // Lire le fichier PDF généré
+    console.log("Lecture du PDF généré...")
+    const tamponPDF = fs.readFileSync(cheminSortie)
+    console.log("Taille du PDF:", tamponPDF.length, "octets")
 
-    // Clean up the generated file
-    console.log("Cleaning up generated PDF file...")
-    fs.unlinkSync(outputPath)
+    // Nettoyer le fichier généré
+    console.log("Nettoyage du fichier PDF généré...")
+    fs.unlinkSync(cheminSortie)
 
-    console.log("PDF generation completed successfully!")
+    console.log("Génération PDF terminée avec succès!")
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(tamponPDF, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${outputFilename}"`,
-        "Content-Length": pdfBuffer.length.toString(),
+        "Content-Disposition": `attachment; filename="${nomFichierSortie}"`,
+        "Content-Length": tamponPDF.length.toString(),
       },
     })
   } catch (error) {
-    console.error("Error generating PDF:", error)
+    console.error("Erreur lors de la génération du PDF:", error)
 
-    // Clean up any temp files on error
-    const tempDataFile = path.join(process.cwd(), "temp_form_data.json")
-    if (fs.existsSync(tempDataFile)) {
-      fs.unlinkSync(tempDataFile)
+    // Nettoyer les fichiers temporaires en cas d'erreur
+    const fichierDonneesTemp = path.join(process.cwd(), "temp_form_data.json")
+    if (fs.existsSync(fichierDonneesTemp)) {
+      fs.unlinkSync(fichierDonneesTemp)
     }
 
     return NextResponse.json(
       {
-        error: "Failed to generate PDF",
+        error: "Échec de la génération du PDF",
         details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },

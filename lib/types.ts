@@ -1,64 +1,64 @@
 export interface TransformerInputs {
-  // General information
-  client_name: string
-  project_name: string
-  transformer_type: string
-  installation_type: string
+  // Informations générales
+  nom_client: string
+  nom_projet: string
+  type_transformateur: string
+  type_installation: string
 
-  // Winding parameters
-  bob_type: string
+  // Paramètres de bobinage
+  type_bob: string
   epaisseur: number
   hauteur: number
-  cond: string
+  conducteur: string
   etage: number
   couche_bt: number
   sps_bt: number
   ep_papier: number
   nb_papier: number
   isolement_bt: number
-  nb_cannaux_bt: number
+  nb_canaux_bt: number
   largeur_canal_bt: number
   depart: string
   dis_circuit_bt1: number
 
-  // Electrical specifications
-  power_kva: number
-  primary_voltage: number
-  secondary_voltage: number
-  frequency_hz: number
+  // Spécifications électriques
+  puissance_kva: number
+  tension_primaire: number
+  tension_secondaire: number
+  frequence_hz: number
   b_max: number
 
-  // Winding & circuit
+  // Enroulements et circuit
   configuration: string
-  winding_material: string
-  primary_coupling: string
-  secondary_coupling: string
+  materiau_enroulement: string
+  couplage_primaire: string
+  couplage_secondaire: string
 
-  // Core & cooling
-  core_material: string
-  sheet_type: string
-  magnetic_circuit_type: string
-  cooling_type: string
-  max_temperature_rise: number
+  // Noyau et refroidissement
+  materiau_noyau: string
+  type_tole: string
+  type_circuit_magnetique: string
+  type_refroidissement: string
+  elevation_temperature_max: number
 }
 
 export interface TransformerResults {
-  copper_mass_kg: number
-  improved_efficiency_percent: number
-  lifetime_cost_eur: number
-  electrical: {
+  masse_cuivre_kg: number
+  rendement_ameliore_pourcent: number
+  cout_vie_eur: number
+  electrique: {
     [key: string]: number | string
   }
-  winding: {
+  bobinage: {
     [key: string]: number | string
   }
-  thermal: {
+  thermique: {
     [key: string]: number | string
   }
-  mechanical: {
+  mecanique: {
     [key: string]: number | string
   }
-  geometry: {
+  geometrie: {
     [key: string]: number | string
   }
   co2: {
@@ -67,12 +67,12 @@ export interface TransformerResults {
   innovations: {
     [key: string]: number | string
   }
-  bom: Array<{
-    component: string
-    quantity: number
-    unit_cost: number
-    total_cost: number
+  nomenclature: Array<{
+    composant: string
+    quantite: number
+    cout_unitaire: number
+    cout_total: number
   }>
-  bom_cost: number
-  suggested_cooling_class: string
+  cout_nomenclature: number
+  classe_refroidissement_suggeree: string
 }

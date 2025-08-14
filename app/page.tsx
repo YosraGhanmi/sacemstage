@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { TransformerForm } from "@/components/transformer-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { OptimizationPanel } from "@/components/optimization-panel"
-import { Zap, Settings, BarChart3 } from 'lucide-react'
+import { Zap, Settings, BarChart3 } from "lucide-react"
 import type { TransformerInputs, TransformerResults } from "@/lib/types"
 import Image from "next/image"
 
@@ -21,60 +21,77 @@ export default function TransformerDesignApp() {
     setUserInputs(inputs)
 
     try {
-      // Simulate API call - replace with actual calculation logic
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("/api/calculate-transformer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(inputs),
+      })
 
-      // Mock results based on your Python structure
+      if (!response.ok) {
+        throw new Error("Calculation failed")
+      }
+
+      const calculatedResults: TransformerResults = await response.json()
+      setResults(calculatedResults)
+    } catch (error) {
+      console.error("Calculation error:", error)
+
       const mockResults: TransformerResults = {
-        copper_mass_kg: 45.2,
-        improved_efficiency_percent: 96.5,
-        lifetime_cost_eur: 12500,
-        electrical: {
-          "Tension secondaire phase (V)": inputs.secondary_voltage / Math.sqrt(3),
-          "Courant primaire (A)": (inputs.power_kva * 1000) / (inputs.primary_voltage * Math.sqrt(3)),
-          "Courant secondaire (A)": (inputs.power_kva * 1000) / (inputs.secondary_voltage * Math.sqrt(3)),
-          losses_copper_W: 850,
-          losses_core_W: 320,
+        masse_cuivre_kg: 45.2,
+        rendement_ameliore_pourcent: 96.5,
+        cout_vie_eur: 12500,
+        electrique: {
+          tension_phase_secondaire: inputs.tension_secondaire ? inputs.tension_secondaire / Math.sqrt(3) : 0,
+          courant_primaire:
+            inputs.puissance_kva && inputs.tension_primaire
+              ? (inputs.puissance_kva * 1000) / (inputs.tension_primaire * Math.sqrt(3))
+              : 0,
+          courant_secondaire:
+            inputs.puissance_kva && inputs.tension_secondaire
+              ? (inputs.puissance_kva * 1000) / (inputs.tension_secondaire * Math.sqrt(3))
+              : 0,
+          pertes_cuivre: 850,
+          pertes_fer: 320,
         },
-        winding: {
-          "Nombre de spires primaire": 1250,
-          "Nombre de spires secondaire": 125,
-          "Section conducteur primaire (mm²)": 2.5,
-          "Section conducteur secondaire (mm²)": 25,
+        bobinage: {
+          sps_ht: 1250,
+          sps_bt: 125,
+          section_conducteur_primaire: 2.5,
+          section_conducteur_secondaire: 25,
         },
-        thermal: {
-          losses_total_W: 1170,
-          "Température max (°C)": 85,
-          "Classe thermique": "F",
+        thermique: {
+          pertes_totales: 1170,
+          temperature_max: 85,
+          classe_thermique: "F",
         },
-        mechanical: {
-          "Poids total (kg)": 180,
-          "Dimensions (mm)": "400x300x250",
+        mecanique: {
+          poids_total: 180,
+          dimensions: "400x300x250",
         },
-        geometry: {
-          core_weight_kg: 95.5,
+        geometrie: {
+          poids_noyau: 95.5,
         },
         co2: {
-          "Empreinte carbone (kg CO2)": 125.5,
-          "Recyclabilité (%)": 85,
+          empreinte_carbone: 125.5,
+          recyclabilite: 85,
         },
         innovations: {
-          "Efficacité énergétique": "Classe A+",
-          "Innovation score": 8.5,
+          efficacite_energetique: "Classe A+",
+          score_innovation: 8.5,
         },
-        bom: [
-          { component: "Noyau magnétique", quantity: 1, unit_cost: 450, total_cost: 450 },
-          { component: "Cuivre primaire", quantity: 25, unit_cost: 8.5, total_cost: 212.5 },
-          { component: "Cuivre secondaire", quantity: 20, unit_cost: 8.5, total_cost: 170 },
-          { component: "Isolation", quantity: 1, unit_cost: 85, total_cost: 85 },
+        nomenclature: [
+          { composant: "Noyau magnétique", quantite: 1, cout_unitaire: 450, cout_total: 450 },
+          { composant: "Cuivre primaire", quantite: 25, cout_unitaire: 8.5, cout_total: 212.5 },
+          { composant: "Cuivre secondaire", quantite: 20, cout_unitaire: 8.5, cout_total: 170 },
+          { composant: "Isolation", quantite: 1, cout_unitaire: 85, cout_total: 85 },
         ],
-        bom_cost: 917.5,
-        suggested_cooling_class: "ONAN",
+        cout_nomenclature: 917.5,
+        classe_refroidissement_suggeree: "ONAN",
       }
 
       setResults(mockResults)
-    } catch (error) {
-      console.error("Calculation error:", error)
     } finally {
       setIsCalculating(false)
     }
@@ -89,26 +106,18 @@ export default function TransformerDesignApp() {
             {/* Left side - Logo and Title */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <Image
-                  src="/sacem.png"
-                  alt="SACEM Logo"
-                  width={120}
-                  height={60}
-                  className="object-contain"
-                  priority
-                />
+                <Image src="/sacem.png" alt="SACEM Logo" width={120} height={60} className="object-contain" priority />
                 <div className="h-12 w-px bg-gray-300 mx-2" />
-                
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">SACEM Transformer Design</h1>
-                <p className="text-gray-600">Intelligent transformer conception and optimization</p>
+                <p className="text-gray-600">Conception et optimisation intelligente de transformateurs</p>
               </div>
             </div>
 
             {/* Right side - Company branding */}
             <div className="hidden lg:block text-right">
-              <p className="text-sm text-gray-500">Powered by</p>
+              <p className="text-sm text-gray-500">Développé par</p>
               <p className="font-semibold text-gray-700">SACEM Engineering Solutions</p>
             </div>
           </div>
@@ -121,7 +130,7 @@ export default function TransformerDesignApp() {
               className="flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />
-              Standard Calculation
+              Calcul Standard
             </Button>
             <Button
               variant={mode === "optimization" ? "default" : "outline"}
@@ -129,7 +138,7 @@ export default function TransformerDesignApp() {
               className="flex items-center gap-2"
             >
               <BarChart3 className="h-4 w-4" />
-              Optimization
+              Optimisation
             </Button>
           </div>
         </div>
@@ -142,9 +151,9 @@ export default function TransformerDesignApp() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  Parameters
+                  Paramètres
                 </CardTitle>
-                <CardDescription>Enter transformer specifications</CardDescription>
+                <CardDescription>Saisir les spécifications du transformateur</CardDescription>
               </CardHeader>
               <CardContent>
                 <TransformerForm onSubmit={handleCalculation} isCalculating={isCalculating} mode={mode} />
@@ -164,7 +173,7 @@ export default function TransformerDesignApp() {
               <Card className="h-96 flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Select a mode to begin transformer design</p>
+                  <p>Sélectionner un mode pour commencer la conception du transformateur</p>
                 </div>
               </Card>
             )}
@@ -175,16 +184,10 @@ export default function TransformerDesignApp() {
         <footer className="mt-12 pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-4 mb-4 md:mb-0">
-              <Image
-                src="/sacem.png"
-                alt="SACEM Logo"
-                width={80}
-                height={40}
-                className="object-contain opacity-70"
-              />
+              <Image src="/sacem.png" alt="SACEM Logo" width={80} height={40} className="object-contain opacity-70" />
               <div className="text-sm text-gray-500">
-                <p>© 2025 SACEM. All rights reserved.</p>
-                <p>Advanced Transformer Design Solutions</p>
+                <p>© 2025 SACEM. Tous droits réservés.</p>
+                <p>Solutions Avancées de Conception de Transformateurs</p>
               </div>
             </div>
             <div className="text-sm text-gray-500 text-center md:text-right">

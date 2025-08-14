@@ -5,33 +5,33 @@ import type { TransformerInputs } from "@/lib/types"
 
 export async function POST(request: NextRequest) {
   try {
-    const inputs: TransformerInputs = await request.json()
+    const entrees: TransformerInputs = await request.json()
 
-    // Validate required inputs
-    if (!inputs.power_kva || !inputs.primary_voltage || !inputs.secondary_voltage) {
+    if (!entrees.puissance_kva || !entrees.tension_primaire || !entrees.tension_secondaire) {
       return NextResponse.json(
-        { error: "Missing required parameters: power_kva, primary_voltage, secondary_voltage" },
+        { error: "Paramètres requis manquants: puissance_kva, tension_primaire, tension_secondaire" },
         { status: 400 },
       )
     }
 
-    // Initialize calculator
-    const calculator = new TransformerCalculator(inputs)
+    const calculateur = new TransformerCalculator(entrees)
 
-    // Perform all calculations
-    const results = calculator.calculateAll()
+    const resultats = calculateur.calculerTout()
 
-    // Generate PDF field mapping
-    const mapper = new PDFFieldMapper()
-    const pdfData = mapper.mapToPDFFields(inputs, results)
+    // Générer le mappage des champs PDF
+    const mappeur = new PDFFieldMapper()
+    const donneesPDF = mappeur.mapperVersChampsPDF(entrees, resultats)
 
-    // Return results with PDF mapping
+    console.log("=== DONNÉES PDF GÉNÉRÉES ===")
+    console.log(JSON.stringify(donneesPDF, null, 2))
+
+    // Retourner les résultats avec le mappage PDF
     return NextResponse.json({
-      ...results,
-      pdfFieldMapping: pdfData,
+      ...resultats,
+      mappageChampsPDF: donneesPDF,
     })
   } catch (error) {
-    console.error("Calculation error:", error)
-    return NextResponse.json({ error: "Internal calculation error" }, { status: 500 })
+    console.error("Erreur de calcul:", error)
+    return NextResponse.json({ error: "Erreur interne de calcul" }, { status: 500 })
   }
 }

@@ -1,14 +1,14 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import type React from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, Play, Upload, FileText } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2, Play, Upload, FileText } from "lucide-react"
 import type { TransformerInputs } from "@/lib/types"
 
 interface TransformerFormProps {
@@ -21,48 +21,48 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
   const [inputMethod, setInputMethod] = useState<"manual" | "file">("manual")
   const [formData, setFormData] = useState({
     // Informations générales
-    client_name: "",
-    project_name: "",
-    transformer_type: "",
-    installation_type: "",
-    
-    // Bobinage
-    bob_type: "",
+    nom_client: "",
+    nom_projet: "",
+    type_transformateur: "",
+    type_installation: "",
+
+    // Paramètres de bobinage - Fixed variable names to match specification
+    type_bob: "",
     epaisseur: "",
     hauteur: "",
-    cond: "",
+    conducteur: "",
     etage: "",
     couche_bt: "",
-    sps_bt: "",
-    ep_papier: "",
-    nb_papier: "",
+    sps_bt: "", // Changed from spires_bt to sps_bt
+    ep_papier: "", // Changed from epaisseur_papier to ep_papier
+    nb_papier: "", // Changed from nombre_papier to nb_papier
     isolement_bt: "",
-    nb_cannaux_bt: "",
+    nb_canaux_bt: "", // Changed from nombre_canaux_bt to nb_canaux_bt
     largeur_canal_bt: "",
     depart: "",
-    dis_circuit_bt1: "",
-    
+    dis_circuit_bt1: "", // Changed from distance_circuit_bt1 to dis_circuit_bt1
+
     // Spécifications électriques
-    power_kva: "",
-    primary_voltage: "",
-    secondary_voltage: "",
-    frequency_hz: "50",
-    b_max: "1.5",
-    
+    puissance_kva: "",
+    tension_primaire: "",
+    tension_secondaire: "",
+    frequence_hz: "50",
+    b_max: "1.5", // Changed from induction_max to b_max
+
     // Enroulements & circuit
     configuration: "",
-    winding_material: "cuivre",
-    primary_coupling: "",
-    secondary_coupling: "",
-    
+    materiau_enroulement: "cuivre",
+    couplage_primaire: "",
+    couplage_secondaire: "",
+
     // Noyau magnétique
-    core_material: "",
-    sheet_type: "",
-    magnetic_circuit_type: "",
-    
+    materiau_noyau: "",
+    type_tole: "",
+    type_circuit_magnetique: "",
+
     // Refroidissement & température
-    cooling_type: "",
-    max_temperature_rise: "",
+    type_refroidissement: "",
+    elevation_temperature_max: "",
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -77,19 +77,19 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
       hauteur: Number.parseFloat(formData.hauteur) || 0,
       etage: Number.parseInt(formData.etage) || 0,
       couche_bt: Number.parseInt(formData.couche_bt) || 0,
-      sps_bt: Number.parseInt(formData.sps_bt) || 0,
-      ep_papier: Number.parseFloat(formData.ep_papier) || 0,
-      nb_papier: Number.parseInt(formData.nb_papier) || 0,
+      sps_bt: Number.parseInt(formData.sps_bt) || 0, // Updated field name
+      ep_papier: Number.parseFloat(formData.ep_papier) || 0, // Updated field name
+      nb_papier: Number.parseInt(formData.nb_papier) || 0, // Updated field name
       isolement_bt: Number.parseFloat(formData.isolement_bt) || 0,
-      nb_cannaux_bt: Number.parseInt(formData.nb_cannaux_bt) || 0,
+      nb_canaux_bt: Number.parseInt(formData.nb_canaux_bt) || 0, // Updated field name
       largeur_canal_bt: Number.parseFloat(formData.largeur_canal_bt) || 0,
-      dis_circuit_bt1: Number.parseFloat(formData.dis_circuit_bt1) || 0,
-      power_kva: Number.parseFloat(formData.power_kva),
-      primary_voltage: Number.parseFloat(formData.primary_voltage),
-      secondary_voltage: Number.parseFloat(formData.secondary_voltage),
-      frequency_hz: Number.parseFloat(formData.frequency_hz),
-      b_max: Number.parseFloat(formData.b_max),
-      max_temperature_rise: Number.parseFloat(formData.max_temperature_rise) || 0,
+      dis_circuit_bt1: Number.parseFloat(formData.dis_circuit_bt1) || 0, // Updated field name
+      puissance_kva: Number.parseFloat(formData.puissance_kva),
+      tension_primaire: Number.parseFloat(formData.tension_primaire),
+      tension_secondaire: Number.parseFloat(formData.tension_secondaire),
+      frequence_hz: Number.parseFloat(formData.frequence_hz),
+      b_max: Number.parseFloat(formData.b_max), // Updated field name
+      elevation_temperature_max: Number.parseFloat(formData.elevation_temperature_max) || 0,
     }
 
     onSubmit(processedData)
@@ -107,19 +107,19 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
         try {
           const content = e.target?.result as string
           // Try to parse JSON file
-          if (file.name.endsWith('.json')) {
+          if (file.name.endsWith(".json")) {
             const data = JSON.parse(content)
-            setFormData(prev => ({ ...prev, ...data }))
-          } else if (file.name.endsWith('.csv')) {
+            setFormData((prev) => ({ ...prev, ...data }))
+          } else if (file.name.endsWith(".csv")) {
             // Basic CSV parsing - you can enhance this
-            const lines = content.split('\n')
-            const headers = lines[0].split(',')
-            const values = lines[1].split(',')
+            const lines = content.split("\n")
+            const headers = lines[0].split(",")
+            const values = lines[1].split(",")
             const data: Record<string, string> = {}
             headers.forEach((header, index) => {
               data[header.trim()] = values[index]?.trim() || ""
             })
-            setFormData(prev => ({ ...prev, ...data }))
+            setFormData((prev) => ({ ...prev, ...data }))
           }
           setInputMethod("manual") // Switch to manual view to show loaded data
         } catch (error) {
@@ -139,32 +139,17 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
           <p className="text-sm text-gray-600 mb-4">
             Chargez un fichier JSON ou CSV contenant les paramètres du transformateur
           </p>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,.csv"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-          
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            className="mb-4"
-          >
+
+          <input ref={fileInputRef} type="file" accept=".json,.csv" onChange={handleFileUpload} className="hidden" />
+
+          <Button onClick={() => fileInputRef.current?.click()} className="mb-4">
             <Upload className="mr-2 h-4 w-4" />
             Choisir un fichier
           </Button>
-          
-          <div className="text-xs text-gray-500 mb-4">
-            Formats supportés: JSON, CSV
-          </div>
-          
-          <Button
-            variant="outline"
-            onClick={() => setInputMethod("manual")}
-            className="w-full"
-          >
+
+          <div className="text-xs text-gray-500 mb-4">Formats supportés: JSON, CSV</div>
+
+          <Button variant="outline" onClick={() => setInputMethod("manual")} className="w-full">
             Ou saisir manuellement
           </Button>
         </div>
@@ -191,11 +176,21 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
       <div className="w-full">
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-5 mb-4">
-            <TabsTrigger value="general" className="text-xs">Général</TabsTrigger>
-            <TabsTrigger value="bobinage" className="text-xs">Bobinage</TabsTrigger>
-            <TabsTrigger value="electrical" className="text-xs">Électrique</TabsTrigger>
-            <TabsTrigger value="winding" className="text-xs">Enroulements</TabsTrigger>
-            <TabsTrigger value="core" className="text-xs">Noyau</TabsTrigger>
+            <TabsTrigger value="general" className="text-xs">
+              Général
+            </TabsTrigger>
+            <TabsTrigger value="bobinage" className="text-xs">
+              Bobinage
+            </TabsTrigger>
+            <TabsTrigger value="electrical" className="text-xs">
+              Électrique
+            </TabsTrigger>
+            <TabsTrigger value="winding" className="text-xs">
+              Enroulements
+            </TabsTrigger>
+            <TabsTrigger value="core" className="text-xs">
+              Noyau
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4 mt-4">
@@ -206,21 +201,21 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="client_name">Nom du client *</Label>
+                    <Label htmlFor="nom_client">Nom du client *</Label>
                     <Input
-                      id="client_name"
-                      value={formData.client_name}
-                      onChange={(e) => updateField("client_name", e.target.value)}
+                      id="nom_client"
+                      value={formData.nom_client}
+                      onChange={(e) => updateField("nom_client", e.target.value)}
                       placeholder="Nom du client"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="project_name">Nom du projet *</Label>
+                    <Label htmlFor="nom_projet">Nom du projet *</Label>
                     <Input
-                      id="project_name"
-                      value={formData.project_name}
-                      onChange={(e) => updateField("project_name", e.target.value)}
+                      id="nom_projet"
+                      value={formData.nom_projet}
+                      onChange={(e) => updateField("nom_projet", e.target.value)}
                       placeholder="Nom du projet"
                       required
                     />
@@ -229,8 +224,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="transformer_type">Type de transformateur</Label>
-                    <Select value={formData.transformer_type} onValueChange={(value) => updateField("transformer_type", value)}>
+                    <Label htmlFor="type_transformateur">Type de transformateur</Label>
+                    <Select
+                      value={formData.type_transformateur}
+                      onValueChange={(value) => updateField("type_transformateur", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -243,8 +241,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="installation_type">Type d'installation</Label>
-                    <Select value={formData.installation_type} onValueChange={(value) => updateField("installation_type", value)}>
+                    <Label htmlFor="type_installation">Type d'installation</Label>
+                    <Select
+                      value={formData.type_installation}
+                      onValueChange={(value) => updateField("type_installation", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -268,8 +269,8 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="bob_type">Type BOB</Label>
-                    <Select value={formData.bob_type} onValueChange={(value) => updateField("bob_type", value)}>
+                    <Label htmlFor="type_bob">Type BOB</Label>
+                    <Select value={formData.type_bob} onValueChange={(value) => updateField("type_bob", value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -305,11 +306,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cond">Cond</Label>
+                    <Label htmlFor="conducteur">Conducteur</Label>
                     <Input
-                      id="cond"
-                      value={formData.cond}
-                      onChange={(e) => updateField("cond", e.target.value)}
+                      id="conducteur"
+                      value={formData.conducteur}
+                      onChange={(e) => updateField("conducteur", e.target.value)}
                       placeholder="Conducteur"
                     />
                   </div>
@@ -337,7 +338,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="sps_bt">SPS BT</Label>
+                    <Label htmlFor="sps_bt">Spires BT</Label>
                     <Input
                       id="sps_bt"
                       type="number"
@@ -350,7 +351,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ep_papier">Ép. Papier</Label>
+                    <Label htmlFor="ep_papier">Épaisseur Papier</Label>
                     <Input
                       id="ep_papier"
                       type="number"
@@ -361,7 +362,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nb_papier">Nb Papier</Label>
+                    <Label htmlFor="nb_papier">Nombre Papier</Label>
                     <Input
                       id="nb_papier"
                       type="number"
@@ -385,12 +386,12 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nb_cannaux_bt">Nb Canaux BT</Label>
+                    <Label htmlFor="nb_canaux_bt">Nombre Canaux BT</Label>
                     <Input
-                      id="nb_cannaux_bt"
+                      id="nb_canaux_bt"
                       type="number"
-                      value={formData.nb_cannaux_bt}
-                      onChange={(e) => updateField("nb_cannaux_bt", e.target.value)}
+                      value={formData.nb_canaux_bt}
+                      onChange={(e) => updateField("nb_canaux_bt", e.target.value)}
                       placeholder="0"
                     />
                   </div>
@@ -425,7 +426,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dis_circuit_bt1">Dis Circuit BT1</Label>
+                  <Label htmlFor="dis_circuit_bt1">Distance Circuit BT1</Label>
                   <Input
                     id="dis_circuit_bt1"
                     type="number"
@@ -447,19 +448,19 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="power_kva">Puissance nominale (kVA) *</Label>
+                    <Label htmlFor="puissance_kva">Puissance nominale (kVA) *</Label>
                     <Input
-                      id="power_kva"
+                      id="puissance_kva"
                       type="number"
-                      value={formData.power_kva}
-                      onChange={(e) => updateField("power_kva", e.target.value)}
+                      value={formData.puissance_kva}
+                      onChange={(e) => updateField("puissance_kva", e.target.value)}
                       placeholder="100"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="frequency_hz">Fréquence (Hz)</Label>
-                    <Select value={formData.frequency_hz} onValueChange={(value) => updateField("frequency_hz", value)}>
+                    <Label htmlFor="frequence_hz">Fréquence (Hz)</Label>
+                    <Select value={formData.frequence_hz} onValueChange={(value) => updateField("frequence_hz", value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -473,23 +474,23 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="primary_voltage">Tension primaire (V) *</Label>
+                    <Label htmlFor="tension_primaire">Tension primaire (V) *</Label>
                     <Input
-                      id="primary_voltage"
+                      id="tension_primaire"
                       type="number"
-                      value={formData.primary_voltage}
-                      onChange={(e) => updateField("primary_voltage", e.target.value)}
+                      value={formData.tension_primaire}
+                      onChange={(e) => updateField("tension_primaire", e.target.value)}
                       placeholder="20000"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="secondary_voltage">Tension secondaire (V) *</Label>
+                    <Label htmlFor="tension_secondaire">Tension secondaire (V) *</Label>
                     <Input
-                      id="secondary_voltage"
+                      id="tension_secondaire"
                       type="number"
-                      value={formData.secondary_voltage}
-                      onChange={(e) => updateField("secondary_voltage", e.target.value)}
+                      value={formData.tension_secondaire}
+                      onChange={(e) => updateField("tension_secondaire", e.target.value)}
                       placeholder="400"
                       required
                     />
@@ -520,7 +521,10 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="configuration">Configuration</Label>
-                    <Select value={formData.configuration} onValueChange={(value) => updateField("configuration", value)}>
+                    <Select
+                      value={formData.configuration}
+                      onValueChange={(value) => updateField("configuration", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -531,8 +535,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="winding_material">Matériau des enroulements</Label>
-                    <Select value={formData.winding_material} onValueChange={(value) => updateField("winding_material", value)}>
+                    <Label htmlFor="materiau_enroulement">Matériau des enroulements</Label>
+                    <Select
+                      value={formData.materiau_enroulement}
+                      onValueChange={(value) => updateField("materiau_enroulement", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -546,8 +553,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="primary_coupling">Couplage primaire</Label>
-                    <Select value={formData.primary_coupling} onValueChange={(value) => updateField("primary_coupling", value)}>
+                    <Label htmlFor="couplage_primaire">Couplage primaire</Label>
+                    <Select
+                      value={formData.couplage_primaire}
+                      onValueChange={(value) => updateField("couplage_primaire", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -561,8 +571,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="secondary_coupling">Couplage secondaire</Label>
-                    <Select value={formData.secondary_coupling} onValueChange={(value) => updateField("secondary_coupling", value)}>
+                    <Label htmlFor="couplage_secondaire">Couplage secondaire</Label>
+                    <Select
+                      value={formData.couplage_secondaire}
+                      onValueChange={(value) => updateField("couplage_secondaire", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -587,8 +600,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="core_material">Matériau du noyau</Label>
-                    <Select value={formData.core_material} onValueChange={(value) => updateField("core_material", value)}>
+                    <Label htmlFor="materiau_noyau">Matériau du noyau</Label>
+                    <Select
+                      value={formData.materiau_noyau}
+                      onValueChange={(value) => updateField("materiau_noyau", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -599,8 +615,8 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="sheet_type">Type de tôle</Label>
-                    <Select value={formData.sheet_type} onValueChange={(value) => updateField("sheet_type", value)}>
+                    <Label htmlFor="type_tole">Type de tôle</Label>
+                    <Select value={formData.type_tole} onValueChange={(value) => updateField("type_tole", value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -620,8 +636,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="magnetic_circuit_type">Type de circuit magnétique</Label>
-                    <Select value={formData.magnetic_circuit_type} onValueChange={(value) => updateField("magnetic_circuit_type", value)}>
+                    <Label htmlFor="type_circuit_magnetique">Type de circuit magnétique</Label>
+                    <Select
+                      value={formData.type_circuit_magnetique}
+                      onValueChange={(value) => updateField("type_circuit_magnetique", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -632,8 +651,11 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cooling_type">Type de refroidissement</Label>
-                    <Select value={formData.cooling_type} onValueChange={(value) => updateField("cooling_type", value)}>
+                    <Label htmlFor="type_refroidissement">Type de refroidissement</Label>
+                    <Select
+                      value={formData.type_refroidissement}
+                      onValueChange={(value) => updateField("type_refroidissement", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -648,12 +670,12 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="max_temperature_rise">Élévation de température max (°C)</Label>
+                  <Label htmlFor="elevation_temperature_max">Élévation de température max (°C)</Label>
                   <Input
-                    id="max_temperature_rise"
+                    id="elevation_temperature_max"
                     type="number"
-                    value={formData.max_temperature_rise}
-                    onChange={(e) => updateField("max_temperature_rise", e.target.value)}
+                    value={formData.elevation_temperature_max}
+                    onChange={(e) => updateField("elevation_temperature_max", e.target.value)}
                     placeholder="65"
                   />
                 </div>
@@ -667,12 +689,12 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
         {isCalculating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Calculating...
+            Calcul en cours...
           </>
         ) : (
           <>
             <Play className="mr-2 h-4 w-4" />
-            {mode === "calculation" ? "Run Calculation" : "Start Optimization"}
+            {mode === "calculation" ? "Lancer le calcul" : "Démarrer l'optimisation"}
           </>
         )}
       </Button>
