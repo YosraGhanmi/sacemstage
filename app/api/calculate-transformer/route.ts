@@ -2,6 +2,10 @@ import { type NextRequest, NextResponse } from "next/server"
 import { TransformerCalculator } from "@/lib/transformer-calculator"
 import { PDFFieldMapper } from "@/lib/pdf-field-mapper"
 import type { TransformerInputs } from "@/lib/types"
+import { exec } from "child_process"
+import { promisify } from "util"
+
+const execAsync = promisify(exec)
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +21,29 @@ export async function POST(request: NextRequest) {
     const calculateur = new TransformerCalculator(entrees)
 
     const resultats = calculateur.calculerTout()
+
+    try {
+      const entreesJson = JSON.stringify(entrees)
+      const resultatsJson = JSON.stringify(resultats)
+
+      const { stdout, stderr } = await execAsync(`python scripts/save_calculation.py`, {
+        env: {
+          ...process.env,
+          ENTREES_JSON: entreesJson,
+          RESULTATS_JSON: resultatsJson,
+        },
+      })
+
+      if (stdout) {
+        console.log(`Calcul sauvegardé: ${stdout.trim()}`)
+      }
+      if (stderr) {
+        console.error("Avertissement base de données:", stderr)
+      }
+    } catch (dbError) {
+      console.error("Erreur de sauvegarde en base:", dbError)
+      // Continue même si la sauvegarde échoue
+    }
 
     // Générer le mappage des champs PDF
     const mappeur = new PDFFieldMapper()
