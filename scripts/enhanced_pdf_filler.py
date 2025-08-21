@@ -32,6 +32,7 @@ class EnhancedPDFFiller:
             "sheet_type": "ToleMagnetique",
             "winding_material": "NatureBob",
             "cooling_type": "DureeCC",
+            "spiresVsp":"spiresVsp",
             
             # Losses and performance
             "core_losses": "PerteVide",
@@ -52,7 +53,7 @@ class EnhancedPDFFiller:
             "CourantPhaseSec": "CourantPhaseSec",
             "ClasseTensionPrim": "ClasseTensionPrim",
             "ClasseTensionSec": "ClasseTensionSec",
-            "ClasseTensionlast": "ClasseTensionlast",
+            "ClasseTensionlast": "classeTensionlast",
             
             # Winding step calculations (Page 1)
             "largeurA": "largeurA", "largeurB": "largeurB", "largeurC": "largeurC",

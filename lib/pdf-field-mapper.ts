@@ -15,6 +15,7 @@ export class PDFFieldMapper {
     tension_primaire: "U1n",
     tension_secondaire: "U20",
     elevation_temperature_max: "echauffement2",
+    
     //couplage_primaire: "Couplage",
 
     // Paramètres techniques
@@ -42,7 +43,7 @@ export class PDFFieldMapper {
     CourantPhaseSec: "CourantPhaseSec",
     ClasseTensionPrim: "ClasseTensionPrim",
     ClasseTensionSec: "ClasseTensionSec",
-    ClasseTensionlast: "ClasseTensionlast",
+    ClasseTensionlast: "classeTensionlast",
 
     // Calculs de bobinage
     largeurA: "largeurA",
@@ -102,9 +103,9 @@ export class PDFFieldMapper {
     ResistanceBT75: "ResistanceBT75",
     ResistanceMT75: "ResistanceMT75",
 
-    "Vsp(V)": "spiresVsp",
-    N1: "spiresN1",
-    N2: "spiresN2",
+    "spiresVsp": "spiresVsp",
+    N1: "SpiresN1",
+    N2: "SpiresN2",
   }
 
   mapperVersChampsPDF(entrees: TransformerInputs, resultats: TransformerResults): Record<string, any> {

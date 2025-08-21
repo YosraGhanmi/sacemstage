@@ -70,7 +70,7 @@ export class TransformerCalculator {
       CourantPhaseSec: courantSec,
       ClasseTensionPrim: this.calculerClasseTensionPrimaire(),
       ClasseTensionSec: this.calculerClasseTensionSecondaire(),
-      ClasseTensionlast: this.obtenirClasseTension(Math.max(tension_primaire, tension_secondaire)),
+      classeTensionlast: this.obtenirClasseTension(Math.max(tension_primaire, tension_secondaire)),
       pertes_cuivre_W: pertesCuivre,
       pertes_fer_W: pertesFer,
     }
@@ -94,7 +94,7 @@ export class TransformerCalculator {
       "Nombre de spires secondaire": nombreSpiresSec,
       "Section conducteur primaire (mm²)": sectionConducteurPrim,
       "Section conducteur secondaire (mm²)": sectionConducteurSec,
-      "Vsp(V)": voltsParSpire,
+      "spiresVsp": voltsParSpire,
       N1: nombreSpiresPrim,
       N2: nombreSpiresSec,
       BobSectionduConducteurprim1: sectionConducteurPrim,
