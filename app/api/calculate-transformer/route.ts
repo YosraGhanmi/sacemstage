@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { TransformerCalculator } from "@/lib/transformer-calculator"
 import { PDFFieldMapper } from "@/lib/pdf-field-mapper"
 import type { TransformerInputs } from "@/lib/types"
 import { exec } from "child_process"
@@ -18,45 +17,62 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const calculateur = new TransformerCalculator(entrees)
-
-    const resultats = calculateur.calculerTout()
+    const entreesJson = JSON.stringify(entrees)
 
     try {
-      const entreesJson = JSON.stringify(entrees)
-      const resultatsJson = JSON.stringify(resultats)
-
-      const { stdout, stderr } = await execAsync(`python scripts/save_calculation.py`, {
+      const { stdout, stderr } = await execAsync(`python scripts/transformer_calculator.py`, {
         env: {
           ...process.env,
           ENTREES_JSON: entreesJson,
-          RESULTATS_JSON: resultatsJson,
         },
       })
 
-      if (stdout) {
-        console.log(`Calcul sauvegardé: ${stdout.trim()}`)
-      }
       if (stderr) {
-        console.error("Avertissement base de données:", stderr)
+        console.error("Python calculation error:", stderr)
+        throw new Error(`Python calculation failed: ${stderr}`)
       }
-    } catch (dbError) {
-      console.error("Erreur de sauvegarde en base:", dbError)
-      // Continue même si la sauvegarde échoue
+
+      const resultats = JSON.parse(stdout.trim())
+
+      // Save calculation to database (existing functionality)
+      try {
+        const resultatsJson = JSON.stringify(resultats)
+
+        const { stdout: saveStdout, stderr: saveStderr } = await execAsync(`python scripts/save_calculation.py`, {
+          env: {
+            ...process.env,
+            ENTREES_JSON: entreesJson,
+            RESULTATS_JSON: resultatsJson,
+          },
+        })
+
+        if (saveStdout) {
+          console.log(`Calcul sauvegardé: ${saveStdout.trim()}`)
+        }
+        if (saveStderr) {
+          console.error("Avertissement base de données:", saveStderr)
+        }
+      } catch (dbError) {
+        console.error("Erreur de sauvegarde en base:", dbError)
+        // Continue même si la sauvegarde échoue
+      }
+
+      // Générer le mappage des champs PDF
+      const mappeur = new PDFFieldMapper()
+      const donneesPDF = mappeur.mapperVersChampsPDF(entrees, resultats)
+
+      console.log("=== DONNÉES PDF GÉNÉRÉES ===")
+      console.log(JSON.stringify(donneesPDF, null, 2))
+
+      // Retourner les résultats avec le mappage PDF
+      return NextResponse.json({
+        ...resultats,
+        mappageChampsPDF: donneesPDF,
+      })
+    } catch (pythonError) {
+      console.error("Erreur d'exécution Python:", pythonError)
+      throw pythonError
     }
-
-    // Générer le mappage des champs PDF
-    const mappeur = new PDFFieldMapper()
-    const donneesPDF = mappeur.mapperVersChampsPDF(entrees, resultats)
-
-    console.log("=== DONNÉES PDF GÉNÉRÉES ===")
-    console.log(JSON.stringify(donneesPDF, null, 2))
-
-    // Retourner les résultats avec le mappage PDF
-    return NextResponse.json({
-      ...resultats,
-      mappageChampsPDF: donneesPDF,
-    })
   } catch (error) {
     console.error("Erreur de calcul:", error)
     return NextResponse.json({ error: "Erreur interne de calcul" }, { status: 500 })
