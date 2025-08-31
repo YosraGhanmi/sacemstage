@@ -3,8 +3,8 @@ import random
 import numpy as np
 from scipy.optimize import minimize
 from core import thermal
-# ---- FONCTIONS D’ÉVALUATION ----
 
+# ---- FONCTIONS D'ÉVALUATION ----
 
 def generate_real_variants(base_inputs, param_to_vary, variation_range, num_variants=5):
     from core.calculation_pipeline import calculate_all

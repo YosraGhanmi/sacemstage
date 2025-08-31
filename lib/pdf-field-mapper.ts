@@ -138,10 +138,11 @@ export class PDFFieldMapper {
   composercouplage(entrees: TransformerInputs): string {
     const {
       couplage_primaire,
-      couplage_secondaire
+      couplage_secondaire,
+      indice_horaire
     } = entrees
 
-    return `${couplage_primaire} ${couplage_secondaire} `
+    return `${couplage_primaire}${couplage_secondaire}${indice_horaire}`
   }
 
   private composerChampInstallation(entrees: TransformerInputs): string {

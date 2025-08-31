@@ -1,6 +1,6 @@
 # core/calculation_pipeline.py
 
-from core.electrical import calculate_electrical_params,calcul_tension_1_phase,calcul_tension_2_phase
+from core.electrical import calculate_electrical_params, calcul_tension_1_phase, calcul_tension_2_phase
 from core.geometry import get_standard_core_dimensions, TankGeometry
 from core.mechanical import (
     calculate_tank_surface_m2,
@@ -20,9 +20,9 @@ from core.thermal import (
     total_losses,
     calculate_temp_rise_convection,
     calculate_final_temperature,
-    cooling_class_check,calculate_combined_temp_rise,calculate_convection_coefficient,calculate_forced_convection_coefficient,calculate_grashof_number,calculate_nusselt_number_vertical,
-    calculate_oil_temp_rise_ONAF,calculate_oil_temp_rise_ONAN,calculate_radiation_loss,calculate_rayleigh_number,calculate_required_surface,calculate_temperature_rise,
-    calculate_thermal_efficiency,estimate_thermal_time_constant,estimate_hotspot_temperature_ONAN
+    cooling_class_check, calculate_combined_temp_rise, calculate_convection_coefficient, calculate_forced_convection_coefficient, calculate_grashof_number, calculate_nusselt_number_vertical,
+    calculate_oil_temp_rise_ONAF, calculate_oil_temp_rise_ONAN, calculate_radiation_loss, calculate_rayleigh_number, calculate_required_surface, calculate_temperature_rise,
+    calculate_thermal_efficiency, estimate_thermal_time_constant, estimate_hotspot_temperature_ONAN
     
 )
 from core.winding import (
@@ -66,9 +66,8 @@ from core.winding import (
     calcule_epaisseur_bt,
     calcule_epaisseur_bt_isol
 )
-from core.optimization import optimize_transformer_multi
+from core.advanced_transformer_optimization import compute_mass, compute_cost, compute_losses, compute_efficiency, _objective_weighted, _temperature_constraint, optimize_transformer
 from output.bom_manager import BOMManager
-from core.advanced_transformer_optimization import compute_mass,compute_cost,compute_losses,compute_efficiency,_objective_weighted,_temperature_constraint,optimize_transformer
 
 def calculer_tensions(user_inputs):
     """
@@ -88,7 +87,6 @@ def calculer_tensions(user_inputs):
 
 def calculate_all(user_inputs):
     results = {}
-
 
     # SECTION ÉLECTRIQUE
     elec_data = calculate_electrical_params(
@@ -110,7 +108,7 @@ def calculate_all(user_inputs):
     I1 = elec_data['I1_A']
     I2 = elec_data['I2_A']
     f = user_inputs["frequency_hz"]
-    b_max = user_inputs["b_max"] # Tesla
+    b_max = user_inputs["b_max"]  # Tesla
     Ae = 0.03  # m² (valeur fictive à remplacer par la vraie surface du noyau)
     l_moy = 0.8  # périmètre moyen d'une spire (m)
     winding_material=user_inputs['winding_material']
@@ -145,7 +143,7 @@ def calculate_all(user_inputs):
     R2 = compute_resistance(1.68e-8, L2, S2)
     Pcu2 = compute_copper_losses(I2, R2)
     mcu2 = compute_copper_mass(L2, S2)
-    courant_bt=calculer_courant_bt(puissance_kVA=user_inputs["power_kva"],tension_BT=V2)
+    courant_bt=calculer_courant_bt(puissance_kVA=user_inputs["power_kva"], tension_BT=V2)
     courant_ht= calculer_courant_ht(S_kVA,V1,transformer_type)
     sps_max=calculer_nb_sps_MT_max(spires_par_volt=0.8,tension_MT=V1)
     spire_bt=calculer_nbre_spires_BT(sps_max, tension_BT=V2,tension_MT=V1)
@@ -198,8 +196,8 @@ def calculate_all(user_inputs):
     "masse_cuivre_1_kg": round(mcu1, 2),
     "masse_cuivre_2_kg": round(mcu2, 2),
     "masse_cuivre_totale_kg": round(mcu1 + mcu2, 2),
-    "courrant_bt":courant_bt,
-    "courrant_ht":courant_ht,
+    "courant_bt":courant_bt,
+    "courant_ht":courant_ht,
     "sps_max":sps_max,
     "spire_bt":round(spire_bt),
     "conducteur_section":conducteur_section,
@@ -323,12 +321,15 @@ def calculate_all(user_inputs):
 
 
     # SECTION OPTIMISATION
+    from core.optimization import optimize_transformer_multi
+    
     optimization_result = optimize_transformer_multi(
         voltage=user_inputs['primary_voltage'],
         power=user_inputs['power_kva'] * 1000,
         weights=(0.4, 0.4, 0.2)
     )
     results["optimization"] = optimization_result
+
     # Définitions nécessaires pour l’innovation
     voltage_V = user_inputs['primary_voltage']
     power_W = user_inputs['power_kva'] * 1000 

@@ -291,7 +291,7 @@ class EnhancedPDFFiller:
                     # Handle multi-instance fields
                     kids = field.get('/Kids')
                     if kids:
-                        print(f"   {i:3d}. FILLED '{clean_name}' = '{value}' (multi-instance: {len(kids)} children)")
+                        #print(f"   {i:3d}. FILLED '{clean_name}' = '{value}' (multi-instance: {len(kids)} children)")
                         for j, kid in enumerate(kids):
                             kid.update(PdfDict(V=value))
                             kid.update(PdfDict(AP=''))
@@ -304,10 +304,10 @@ class EnhancedPDFFiller:
                     filled_count += 1
                     
                 except Exception as field_error:
-                    print(f"   {i:3d}. ERROR '{clean_name}' - {str(field_error)}")
+                    #print(f"   {i:3d}. ERROR '{clean_name}' - {str(field_error)}")
                     skipped_count += 1
             else:
-                print(f"   {i:3d}. SKIPPED '{clean_name}' - no data available")
+                #print(f"   {i:3d}. SKIPPED '{clean_name}' - no data available")
                 skipped_count += 1
         
         print(f"\nAcroForm Summary:")
@@ -365,7 +365,7 @@ class EnhancedPDFFiller:
                         print(f"   {i:3d}. SKIPPED '{field_name}' - no data available")
                         page_skipped += 1
             
-            print(f"   Page {page_num} Summary: {widget_count} widgets, {page_filled} filled, {page_skipped} skipped")
+            #print(f"   Page {page_num} Summary: {widget_count} widgets, {page_filled} filled, {page_skipped} skipped")
             total_filled += page_filled
             total_skipped += page_skipped
         
@@ -540,6 +540,8 @@ def main():
         # Add current date
         data["Date"] = datetime.now().strftime("%d/%m/%Y")
         print(f"Added current date: {data['Date']}")
+        data["Variation"]="± 2x2.5"
+        data["DureeCC"]= 2
         
         # Fill PDF
         result = filler.fill_pdf_comprehensive(input_pdf, output_pdf, data)

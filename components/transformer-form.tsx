@@ -25,6 +25,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
     nom_projet: "",
     type_transformateur: "",
     type_installation: "",
+    indice_horaire: "",
 
     // Paramètres de bobinage - Fixed variable names to match specification
     type_bob: "",
@@ -90,6 +91,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
       frequence_hz: Number.parseFloat(formData.frequence_hz),
       b_max: Number.parseFloat(formData.b_max), // Updated field name
       elevation_temperature_max: Number.parseFloat(formData.elevation_temperature_max) || 0,
+      indice_horaire: formData.indice_horaire|| "0",
     }
 
     onSubmit(processedData)
@@ -257,6 +259,8 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </Select>
                   </div>
                 </div>
+
+                
               </CardContent>
             </Card>
           </TabsContent>
@@ -587,6 +591,31 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="indice_horaire">Indice horaire</Label>
+                  <Select
+                    value={formData.indice_horaire}
+                    onValueChange={(value) => updateField("indice_horaire", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">0</SelectItem>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="6">6</SelectItem>
+                      <SelectItem value="7">7</SelectItem>
+                      <SelectItem value="8">8</SelectItem>
+                      <SelectItem value="9">9</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="11">11</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>

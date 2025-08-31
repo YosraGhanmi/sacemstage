@@ -1,13 +1,13 @@
 import json
-import math
 import os
+import sys
+import math
 from typing import Dict, Any, List
 
 class TransformerCalculator:
     def __init__(self, entrees: Dict[str, Any]):
         self.entrees = entrees
         
-        # Constants (from XLSM data & transformer engineering refs)
         self.RESISTIVITY_CU = 1.724e-8  # Ω·m at 20°C
         self.RESISTIVITY_AL = 2.82e-8   # Ω·m at 20°C
         self.TEMP_COEFF_RESISTIVITY = 0.00393
@@ -16,7 +16,6 @@ class TransformerCalculator:
         self.STACKING_FACTOR = 0.9
         
         self.CORE_LOSS_TABLE = {
-            # W/kg at Bmax=1.5T from XLSM
             "0.27mm": 0.85,
             "0.30mm": 0.95,
             "0.35mm": 1.1,
@@ -30,21 +29,21 @@ class TransformerCalculator:
             thermique = self.calculer_thermique()
             mecanique = self.calculer_mecanique()
             geometrie = self.calculer_geometrie()
-
+            
             return {
-                "masse_cuivre_kg": self.calculer_poids_cuivre(),
-                "rendement_ameliore_pourcent": self.calculer_rendement(),
-                "cout_vie_eur": self.calculer_cout_vie(),
                 "electrique": electrique,
                 "bobinage": bobinage,
                 "thermique": thermique,
                 "mecanique": mecanique,
                 "geometrie": geometrie,
+                "masse_cuivre_kg": self.calculer_poids_cuivre(),
+                "rendement_ameliore_pourcent": self.calculer_rendement(),
+                "cout_vie_eur": self.calculer_cout_vie(),
                 "co2": self.calculer_impact_co2(),
-                "innovations": self.calculer_innovations(),
                 "nomenclature": self.calculer_nomenclature(),
                 "cout_nomenclature": self.calculer_cout_nomenclature(),
                 "classe_refroidissement_suggeree": self.suggerer_classe_refroidissement(),
+                "success": True
             }
         except Exception as e:
             return {
@@ -170,8 +169,8 @@ class TransformerCalculator:
         }
 
     def calculer_nomenclature(self) -> List[Dict[str, Any]]:
-        puissance_kva = self.entrees["puissance_kva"]
-        materiau_enroulement = self.entrees["materiau_enroulement"]
+        puissance_kva = self.entrees.get("puissance_kva", self.entrees.get("power_kva", 100))
+        materiau_enroulement = self.entrees.get("materiau_enroulement", self.entrees.get("winding_material", "cuivre"))
         prix_cuivre = 8.5 if materiau_enroulement == "cuivre" else 6.2
         
         return [
@@ -319,11 +318,19 @@ class TransformerCalculator:
 
     # Utility methods
     def obtenir_classe_tension(self, tension: float) -> str:
-        if tension <= 1000:
-            return "BT"
-        if tension <= 35000:
-            return "MT"
-        return "HT"
+        if tension >= 24000:
+            return "36"
+        if tension >= 17500:
+            return "24"
+        if tension >= 12000:
+            return "17.5"
+        if tension >= 7600:
+            return "12"
+        if tension >= 3600:
+            return "7.2"
+        if tension >= 1100:
+            return "3.6"
+        return "1.1"
 
     def obtenir_classe_thermique(self, temp: float) -> str:
         if temp <= 105:
