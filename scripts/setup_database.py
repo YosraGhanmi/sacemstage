@@ -41,7 +41,7 @@ class TransformerCalculation(Base):
     pertes_court_circuit = Column(Float)
     tension_court_circuit_pourcent = Column(Float)
     pertes_totales = Column(Float)
-    echauffement = Column(String(50))
+    echauffement2 = Column(String(50))
     
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -101,8 +101,8 @@ class CalculThermique(Base):
     pertes_totales = Column(Float)
     temperature_max = Column(Float)
     classe_thermique = Column(String(50))
-    echauffement_huile = Column(Float)
-    echauffement_cuivre = Column(Float)
+    echauffement2_huile = Column(Float)
+    echauffement2_cuivre = Column(Float)
     
     calculation = relationship("TransformerCalculation", back_populates="thermique")
 

@@ -63,7 +63,8 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
 
     // Refroidissement & température
     type_refroidissement: "",
-    elevation_temperature_max: "",
+    temperature: "",
+    
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -90,8 +91,9 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
       tension_secondaire: Number.parseFloat(formData.tension_secondaire),
       frequence_hz: Number.parseFloat(formData.frequence_hz),
       b_max: Number.parseFloat(formData.b_max), // Updated field name
-      elevation_temperature_max: Number.parseFloat(formData.elevation_temperature_max) || 0,
+      temperature: Number.parseFloat(formData.temperature) || 0,
       indice_horaire: formData.indice_horaire|| "0",
+      
     }
 
     onSubmit(processedData)
@@ -617,6 +619,7 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                     </SelectContent>
                   </Select>
                 </div>
+                
               </CardContent>
             </Card>
           </TabsContent>
@@ -699,12 +702,12 @@ export function TransformerForm({ onSubmit, isCalculating, mode }: TransformerFo
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="elevation_temperature_max">Élévation de température max (°C)</Label>
+                  <Label htmlFor="temperature">température (°C)</Label>
                   <Input
-                    id="elevation_temperature_max"
+                    id="temperature"
                     type="number"
-                    value={formData.elevation_temperature_max}
-                    onChange={(e) => updateField("elevation_temperature_max", e.target.value)}
+                    value={formData.temperature}
+                    onChange={(e) => updateField("temperature", e.target.value)}
                     placeholder="65"
                   />
                 </div>

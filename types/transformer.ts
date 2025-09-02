@@ -14,8 +14,8 @@ export interface TransformerInputs {
 
 export interface ElectricalResults {
   "Tension secondaire phase (V)": number
-  "Courant primaire (A)": number
-  "Courant secondaire (A)": number
+  "CourantPrim": number
+  "CourantSec": number
   losses_copper_W: number
   losses_core_W: number
 }
@@ -29,7 +29,7 @@ export interface WindingResults {
 
 export interface ThermalResults {
   losses_total_W: number
-  "Température max (°C)": number
+  "echauffement1": number
   "Classe thermique": string
 }
 

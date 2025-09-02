@@ -26,8 +26,7 @@ class EnhancedPDFFiller:
             "secondary_voltage": "U20 (V)",
             "max_temperature_rise": "Variation",
             "primary_coupling": "Couplage",
-            "core_material": "ClU(KV)",
-            "current_density": "Densite",
+            "densite_courant": "Densite",
             "b_max": "Induction",
             "sheet_type": "ToleMagnetique",
             "winding_material": "NatureBob",
@@ -35,12 +34,12 @@ class EnhancedPDFFiller:
             "spiresVsp":"spiresVsp",
             
             # Losses and performance
-            "core_losses": "PerteVide",
+            "PerteVide": "PerteVide",
             "no_load_current": "I0Vide",
             "copper_losses": "Pcc", 
             "short_circuit_voltage": "Ucc",
             "total_losses": "PertesTot",
-            "temperature_rise": "echauffement",
+            "temperature_rise": "echauffement1",
             
             # Calculated electrical values
             "tensionLignePrim": "tensionLignePrim",
@@ -273,7 +272,7 @@ class EnhancedPDFFiller:
         for i, field in enumerate(fields, 1):
             field_name = field.get('/T')
             if not field_name:
-                print(f"   {i:3d}. [UNNAMED FIELD] - skipping")
+                #print(f"   {i:3d}. [UNNAMED FIELD] - skipping")
                 skipped_count += 1
                 continue
                 
@@ -345,7 +344,7 @@ class EnhancedPDFFiller:
                     field_name_obj = annot.get('/T')
                     
                     if not field_name_obj:
-                        print(f"   {i:3d}. [UNNAMED WIDGET] - skipping")
+                        #print(f"   {i:3d}. [UNNAMED WIDGET] - skipping")
                         page_skipped += 1
                         continue
                     
@@ -356,13 +355,13 @@ class EnhancedPDFFiller:
                         try:
                             annot.update(PdfDict(V=value))
                             annot.update(PdfDict(AP=''))
-                            print(f"   {i:3d}. FILLED '{field_name}' = '{value}'")
+                            #print(f"   {i:3d}. FILLED '{field_name}' = '{value}'")
                             page_filled += 1
                         except Exception as annot_error:
                             print(f"   {i:3d}. ERROR '{field_name}' - {str(annot_error)}")
                             page_skipped += 1
                     else:
-                        print(f"   {i:3d}. SKIPPED '{field_name}' - no data available")
+                        #print(f"   {i:3d}. SKIPPED '{field_name}' - no data available")
                         page_skipped += 1
             
             #print(f"   Page {page_num} Summary: {widget_count} widgets, {page_filled} filled, {page_skipped} skipped")

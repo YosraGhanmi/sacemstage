@@ -4,6 +4,7 @@ export interface TransformerInputs {
   nom_projet: string
   type_transformateur: string
   type_installation: string
+  indice_horaire: string
 
   // Paramètres de bobinage
   type_bob: string
@@ -39,7 +40,22 @@ export interface TransformerInputs {
   type_tole: string
   type_circuit_magnetique: string
   type_refroidissement: string
-  elevation_temperature_max: number
+  temperature: number
+
+  optimization_mode?: string
+  calculation_type?: string
+  optimization_criteria?: {
+    cost: boolean
+    efficiency: boolean
+    weight: boolean
+    losses: boolean
+  }
+  advanced_features?: {
+    thermal_analysis: boolean
+    mechanical_stress: boolean
+    innovative_calculations: boolean
+    multi_objective_optimization: boolean
+  }
 }
 
 export interface TransformerResults {

@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS transformer_calculations (
     pcc_w DECIMAL(10,2),
     ucc_pourcent DECIMAL(5,2),
     pertes_totales_w DECIMAL(10,2),
-    echauffement VARCHAR(50),
+    echauffement2 VARCHAR(50),
     
     -- Calculated results
     masse_cuivre_kg DECIMAL(10,2),

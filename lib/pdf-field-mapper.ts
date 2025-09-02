@@ -14,12 +14,12 @@ export class PDFFieldMapper {
     frequence_hz: "frequence",
     tension_primaire: "U1n",
     tension_secondaire: "U20",
-    elevation_temperature_max: "echauffement2",
+    temperature: "echauffement1",
     
     //couplage_primaire: "Couplage",
 
     // Paramètres techniques
-    materiau_noyau: "ClU",
+    materiau_noyau: "CIU",
     densite_courant: "Densite",
     b_max: "Induction",
     type_tole: "ToleMagnetique",
@@ -31,7 +31,7 @@ export class PDFFieldMapper {
     pertes_cuivre: "Pcc",
     tension_court_circuit: "Ucc",
     pertes_totales: "PertesTot",
-    Echauffement: "echauffement1",
+    echauffement2: "echauffement2",
 
     tensionLignePrim: "tensionLignePrim",
     tensionLigneSec: "tensionLigneSec",

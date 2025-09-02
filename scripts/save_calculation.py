@@ -36,7 +36,7 @@ def save_calculation_to_db(entrees_json, resultats_json):
             pertes_court_circuit=entrees.get('pertes_court_circuit', 0),
             tension_court_circuit_pourcent=entrees.get('tension_court_circuit_pourcent', 0),
             pertes_totales=entrees.get('pertes_totales', 0),
-            echauffement=entrees.get('elevation_temperature_max', '')
+            echauffement2=entrees.get('temperature', '')
         )
         
         session.add(nouveau_calcul)
@@ -79,10 +79,10 @@ def save_calculation_to_db(entrees_json, resultats_json):
             calcul_therm = CalculThermique(
                 calculation_id=nouveau_calcul.id,
                 pertes_totales=therm.get('pertes_totales_W', 0),
-                temperature_max=therm.get('Température max (°C)', 0),
+                temperature_max=therm.get('echauffement1', 0),
                 classe_thermique=therm.get('Classe thermique', ''),
-                echauffement_huile=therm.get('Echauffement', 0),
-                echauffement_cuivre=therm.get('Echauffement', 0)
+                echauffement2_huile=therm.get('echauffement2', 0),
+                echauffement2_cuivre=therm.get('echauffement2', 0)
             )
             session.add(calcul_therm)
         

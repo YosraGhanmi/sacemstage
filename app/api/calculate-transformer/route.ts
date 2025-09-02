@@ -17,7 +17,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const entreesJson = JSON.stringify(entrees)
+    const calculationType = entrees.calculation_type || "standard"
+    const optimizationMode = entrees.optimization_mode || false
+
+    const entreesJson = JSON.stringify({
+      ...entrees,
+      calculation_type: calculationType,
+      optimization_mode: optimizationMode,
+    })
 
     try {
       const { stdout, stderr } = await execAsync(`python scripts/transformer_calculator.py`, {

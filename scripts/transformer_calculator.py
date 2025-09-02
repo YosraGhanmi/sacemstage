@@ -61,7 +61,8 @@ class TransformerCalculator:
 
         courant_prim = self.calculer_courant_ligne_primaire()
         courant_sec = self.calculer_courant_ligne_secondaire()
-
+        courant_fprim = self.calculer_courant_phase_primaire()
+        courant_fsec = self.calculer_courant_phase_secondaire()
         tension_phase_prim = self.calculer_tension_phase_primaire()
         tension_phase_sec = self.calculer_tension_phase_secondaire()
 
@@ -75,8 +76,8 @@ class TransformerCalculator:
             "tensionPhaseSec": tension_phase_sec,
             "CourantLignePrim": courant_prim,
             "CourantLigneSec": courant_sec,
-            "CourantPhasePrim": courant_prim,
-            "CourantPhaseSec": courant_sec,
+            "CourantPhasePrim": courant_fprim,
+            "CourantPhaseSec": courant_fsec,
             "ClasseTensionPrim": self.calculer_classe_tension_primaire(),
             "ClasseTensionSec": self.calculer_classe_tension_secondaire(),
             "classeTensionlast": self.obtenir_classe_tension(max(tension_primaire, tension_secondaire)),
@@ -88,8 +89,7 @@ class TransformerCalculator:
         tension_primaire = self.entrees["tension_primaire"]
         tension_secondaire = self.entrees["tension_secondaire"]
 
-        volts_par_spire = self.calculer_volts_par_spire()
-        rapport_spires = tension_primaire / tension_secondaire
+        spiresvsp = self.calculer_spires_vsp()
         nombre_spires_prim = self.calculer_nombre_spires_primaire()
         nombre_spires_sec = self.calculer_nombre_spires_secondaire()
 
@@ -97,11 +97,7 @@ class TransformerCalculator:
         section_conducteur_sec = self.calculer_section_conducteur_secondaire()
 
         return {
-            "Nombre de spires primaire": nombre_spires_prim,
-            "Nombre de spires secondaire": nombre_spires_sec,
-            "Section conducteur primaire (mm²)": section_conducteur_prim,
-            "Section conducteur secondaire (mm²)": section_conducteur_sec,
-            "spiresVsp": volts_par_spire,
+            "spiresVsp": spiresvsp,
             "N1": nombre_spires_prim,
             "N2": nombre_spires_sec,
             "BobSectionduConducteurprim1": section_conducteur_prim,
@@ -116,9 +112,9 @@ class TransformerCalculator:
 
         return {
             "pertes_totales_W": pertes_totales,
-            "Température max (°C)": round(temperature_max),
+            "echauffement1": round(temperature_max),
             "Classe thermique": self.obtenir_classe_thermique(temperature_max),
-            "Echauffement": self.calculer_echauffement(),
+            "echauffement2": self.calculer_echauffement2(),
         }
 
     def calculer_mecanique(self) -> Dict[str, Any]:
@@ -235,6 +231,14 @@ class TransformerCalculator:
 
     def calculer_courant_ligne_secondaire(self) -> float:
         return (self.entrees["puissance_kva"] * 1000) / (self.entrees["tension_secondaire"] * math.sqrt(3))
+    def calculer_courant_phase_primaire(self) -> float :
+        if self.entrees["couplage_primaire"] == "D" :
+            return self.calculer_courant_ligne_primaire()/ math.sqrt(3)
+        return self.calculer_courant_ligne_primaire()
+    def calculer_courant_phase_secondaire(self) -> float :
+        if self.entrees["couplage_secondaire"] == "D" :
+            return self.calculer_courant_ligne_secondaire()/ math.sqrt(3)
+        return self.calculer_courant_ligne_secondaire()
 
     def calculer_classe_tension_primaire(self) -> str:
         return self.obtenir_classe_tension(self.entrees["tension_primaire"])
@@ -242,14 +246,13 @@ class TransformerCalculator:
     def calculer_classe_tension_secondaire(self) -> str:
         return self.obtenir_classe_tension(self.entrees["tension_secondaire"])
 
-    def calculer_nombre_spires_primaire(self) -> int:
-        volts_par_spire = self.calculer_volts_par_spire()
-        return round(self.entrees["tension_primaire"] / volts_par_spire)
+    
 
     def calculer_nombre_spires_secondaire(self) -> int:
         rapport_spires = self.entrees["tension_primaire"] / self.entrees["tension_secondaire"]
         return round(self.calculer_nombre_spires_primaire() / rapport_spires)
-
+    def calculer_spires_vsp(self) -> float:
+        return self.calculer_courant_phase_secondaire() / self.entrees.get("sps_bt")
     def calculer_volts_par_spire(self) -> float:
         tension_primaire = self.entrees.get("tension_primaire", 0)
         frequence_hz = self.entrees.get("frequence_hz", 50)  # Default to 50Hz
@@ -296,11 +299,12 @@ class TransformerCalculator:
         return self.calculer_pertes_cuivre() + self.calculer_pertes_fer()
 
     def calculer_temperature_max(self) -> float:
-        pertes_totales = self.calculer_pertes_totales()
-        return 75 + (pertes_totales / self.entrees["puissance_kva"]) * 0.05
+        temp = self.entrees["temperature"]
+        return temp
 
-    def calculer_echauffement(self) -> int:
-        return round(self.calculer_temperature_max() - 40)
+    def calculer_echauffement2(self) -> int:
+        temp = self.calculer_temperature_max() + 5
+        return temp
 
     def calculer_poids_total_kg(self) -> float:
         return self.entrees["puissance_kva"] * 1.8 + 50
